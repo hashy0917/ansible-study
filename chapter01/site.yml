@@ -1,0 +1,26 @@
+---
+- name: PlayBookチュートリアル
+  hosts: all
+  become: true
+  tasks:
+      - name: libselinux-python install
+        yum:
+            name: libselinux-python
+            state: present
+      - name: EPEL repository install 
+        yum:
+            name: epel-release
+            state: present
+      - name: Nginx install
+        yum:
+            name: nginx
+            state: present
+      - name: Nginx Service start & enable
+        service:
+            name: nginx
+            state: started
+            enabled: true
+      - name: create /tmp/dir1
+        file:
+            path: /tmp/dir1
+            state: directory

@@ -1,0 +1,22 @@
+---
+# tasks file for nginx---
+- name: Playbook tutorial
+  hosts: all
+  become: true
+  tasks:
+      - name: libselinux-python and EPELrepositories install
+        yum:
+            name: "{{ item }}"
+            state: present
+        with_items:
+            - libselinux-python
+            - epel-release
+      - name: Nginx install
+        yum:
+            name: nginx
+            state: present
+      - name: Nginx start and enable.
+        service:
+            name: nginx
+            state: started
+            enabled: true

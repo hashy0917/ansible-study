@@ -15,3 +15,7 @@
       name: nginx
       state: started
       enabled: true
+- name: nginx.conf
+  template:
+      src: nginx.j2.conf
+      dest: /etc/nginx/nginx.conf

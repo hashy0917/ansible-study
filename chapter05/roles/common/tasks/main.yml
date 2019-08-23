@@ -1,2 +1,12 @@
 ---
-# tasks file for common
+- name: Install SELinux for Python
+  yum:
+      name: "{{ item }}"
+  with_items:
+      - libselinux-python
+      - policycoreutils-python
+- name: Disable SELinux
+  selinux:
+      policy: targeted
+      state: permissive
+  register: common_make_selinux_permissive

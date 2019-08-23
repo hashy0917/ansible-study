@@ -22,3 +22,15 @@
       validate: nginx -t -c %s
   notify:
       - Nginx Reload
+- name: Create Nginx Groups
+  group:
+      name: "{{ nginx_group }}"
+      system: true
+- name: Create Nginx User
+  user:
+      name: "{{ nginx_user }}"
+      home: /var/lib/nginx
+      shell: /sbin/nologin
+      groups: "{{ nginx_group }}"
+      append: true
+      system: true

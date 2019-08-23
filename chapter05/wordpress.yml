@@ -2,6 +2,10 @@
 - name: Setup Wordpress for CentOS
   hosts: all
   become: true
+  vars:
+      db_name: wordpress
+      db_user: wordpress
+      db_password: mysQ1InsecureP@ssw0rd
   roles:
       - name: common
         tags:
@@ -9,6 +13,13 @@
       - name: mariadb
         tags:
             - mariadb
+        vars:
+            mariadb_databases:
+                - name: "{{ db_name }}"
+            mariadb_users:
+                - name: "{{ db_user }}"
+                  password: "{{ db_password }}"
+                  priv: "{{ db_name }}.*:ALL"
       - name: php-fpm
         tags:
             - php-fpm

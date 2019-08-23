@@ -15,7 +15,10 @@
       name: nginx
       state: started
       enabled: true
-- name: nginx.conf
+- name: nginx.conf(template)Open
   template:
       src: nginx.j2.conf
       dest: /etc/nginx/nginx.conf
+      validate: nginx -t -c %s
+  notify:
+      - Nginx Reload

@@ -21,7 +21,7 @@
       dest: /etc/nginx/nginx.conf
       validate: nginx -t -c %s
   notify:
-      - Nginx Reload
+      - Reload Nginx
 - name: Create Nginx Groups
   group:
       name: "{{ nginx_group }}"

@@ -17,7 +17,7 @@
       - "{{ php_fpm_additional_packages }}"
   notify:
       - Reload PHP-FPM
-- name: Reload PHP-FPM
+- name: Start PHP-FPM
   service:
       name: php-fpm
       state: started

@@ -23,9 +23,14 @@
       - name: php-fpm
         tags:
             - php-fpm
+        vars:
+            php_fpm_additional_packages:
+                - php-mysqlnd
       - name: nginx
         tags:
             - nginx
+        vars:
+            nginx_default_port: 8080
       - name: wordpress
         tags:
             - wordpress

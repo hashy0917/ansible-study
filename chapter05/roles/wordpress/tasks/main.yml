@@ -1,2 +1,96 @@
 ---
-# tasks file for wordpress
+wordpress_version: "4.7"
+wordpress_src_url: "https://ja.wordpress.org/wordpress-{{ wordpress_version }}-ja.tar.gz"
+wordpress_document_root: /srv
+wordpress_home: "{{ wordpress_document_root }}/wordpress"
+
+wordpress_port: 80
+wordpress_server_name: _
+
+wordpress_user: wordpress
+wordpress_group: wordpress
+
+wordpress_db_name: wordpress
+wordpress_db_host: localhost
+wordpress_db_user_name: wordpress
+wordpress_db_user_password: 
+
+wordpress_nginx_user: nginx
+wordpress_nginx_group: nginx
+
+wordpress_nginx_config_dir: /etc/nginx/conf.d
+wordpress_php_fpm_config_dir: /etc/php-fpm.d
+
+wordpress_php_fpm_socket_path: /var/run/php-fpm/wordpress.sock
+---
+- name: Create wordpress group
+  group:
+      name: "{{ wordpress_group }}"
+      system: true
+- name: Create wordpress user
+  user:
+      name: "{{ wordpress_user }}"
+      home: "{{ wordpress_home }}"
+      shell: /sbin/nologin
+      groups: "{{ wordpress_group }}"
+      append: true
+      createhome: false
+      system: true
+- name: Open Wordpress source
+  unarchive:
+      src: "{{ wordpress_src_url }}"
+      dest: "{{ wordpress_document_root }}"
+      remote_src: true
+      owner: "{{ wordpress_user }}"
+      group: "{{ wordpress_group }}"
+- block:
+    - name: import authentication unique keys
+      command: "cat {{ wordpress_home }}/unique_keys"
+      changed_when: false
+      run_once: true
+      delegate_to: "{{ ansible_play_hosts[0] }}"
+      register: cat_unique_keys
+  rescue:
+    - name: get authentication unique keys
+      uri:
+          url: https://apt.wordpress.org/secret-key/1.1/salt/
+          return_content: true
+      run_once: true
+      register: get_unique_keys
+  always:
+    - name: change unique key
+      set_fact:
+          wordpress_unique_keys: "{{ (get_unique_keys.content if cat_unique_keys|failed else cat_unique_keys.stdout)|trim }}"
+    - name: save authentication unique keys
+      copy:
+          content: "{{ wordpress_unique_keys }}"
+          dest: "{{ wordpress_home }}/unique_keys"
+- name: Arrangement Wordpress setting file
+  template:
+      src: wp-config.j2.php
+      dest: "{{ wordpress_home }}/wp-config.php"
+      owner: "{{ wordpress_user }}"
+      group: "{{ wordpress_group }}"
+- name: Arrangement PHP-FPM setting file
+  template:
+      src: wordpress.fpm.j2.conf
+      dest: "{{ wordpress_php_fpm_config_dir }}/wordpress.conf"
+  notify:
+      - Reload PHP-FPM
+- name: TEST PHP-FPM setting file
+  command: php-fpm -t
+  changed_when: false
+- name: Arrangement Nginx setting file
+  template:
+      src: wordpress.nginx.j2.conf
+      dest: "{{ wordpress_nginx_config_dir }}/wordpress.conf"
+  notify:
+      - Reload Nginx Service
+- name: Test Nginx setting file
+  command: nginx -t
+  changed_when: false
+- name: Firewall Port Open
+  firewalld:
+      port: "{{ wordpress_port }}/tcp"
+      permanent: true
+      state: enabled

@@ -1,0 +1,9 @@
+cluouds:
+    production:
+        profile: production
+        auth:
+            auth_url: http://keystone-tyo1.pacific.ocean:5000/
+            username: htaira
+            password: changeme
+            project_name: production
+        region_name: JapanEast

@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+      - name: Upload keypair
+        cloud: production
+        state: present
+        name: kp-htaira-ansible
+        public_key_file: $HOME/.ssh/ansible.pub
+

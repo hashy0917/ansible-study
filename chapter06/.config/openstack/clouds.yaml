@@ -7,3 +7,11 @@ cluouds:
             password: changeme
             project_name: production
         region_name: JapanEast
+    internal:
+        profile: internal
+        auth:
+            auth_url: http://192.168.0.1/
+            username: admin
+            password: admin
+            project_name: demo
+        region_name: RegionOne

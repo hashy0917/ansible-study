@@ -8,5 +8,6 @@ This dir tree.
 ```
 please praction.
 ```
-# mv -r .config/openstack $HOME/.config/.
+$ mv -r .config/openstack $HOME/.config/.
+$ openstack --os-cloud production catalog list
 ```

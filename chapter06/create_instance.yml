@@ -35,3 +35,9 @@
             meta:
                 hostname: "{{ item.value.hostname }}"
         with_dict: "{{ instance }}"
+      - name: assign floating ip
+        os_floating_ip:
+            state: present
+            network: public
+            server: webserver
+

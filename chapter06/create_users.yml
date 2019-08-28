@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+      users:
+          taro:
+              email: taro@example.com
+              password: test
+          hanako:
+              email: hanako@example.com
+              password: tset
+  tasks:
+      - name: create user
+        os_user:
+            cloud: internal
+            name: "{{ item.key }}"
+            state: present
+            password: "{{ item.key }}"
+            email: "{{ item.value.password }}"
+            default_project: demo
+        with_dict: "{{ users }}"

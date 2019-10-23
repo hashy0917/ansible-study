@@ -1,0 +1,3 @@
+https://qiita.com/takehilo/items/e95dede547310b19dd2d
+
+https://github.com/ansible/ansible.git

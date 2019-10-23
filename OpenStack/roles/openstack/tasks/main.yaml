@@ -1,0 +1,65 @@
+---
+- name: create network
+  os_network:
+    cloud: demo
+    state: present
+    name: demo-net
+
+- name: create subnet
+  os_subnet:
+    cloud: demo
+    name: demo-subnet
+    network_name: demo-net
+    cidr: 10.0.0.0/24
+    dns_nameservers: 8.8.8.8
+    state: present
+
+- name: create router
+  os_router:
+    cloud: demo
+    name: demo-router
+    state: present
+    network: publicNW
+    interfaces:
+      - demo-subnet
+
+- name: create security group
+  os_security_group:
+    cloud: demo
+    state: present
+    name: demo-sg
+
+- name: add security group rule
+  os_security_group_rule:
+    cloud: demo
+    state: present
+    security_group: demo-sg
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: create keypair
+  os_keypair:
+    cloud: demo
+    state: present
+    name: demo-key
+  register: keypair_info
+
+- name: create private key
+  copy:
+    content: "{{ keypair_info['key']['private_key'] }}"
+    dest: ./demo-key-private.pem
+    mode: 0600
+
+- name: create instance
+  os_server:
+    cloud: demo
+    state: present
+    name: demo-instance
+    image: centos7.0
+    flavor: 1
+    key_name: demo-key
+    security_groups: demo-sg
+    network: demo-net
+    floating_ip_pools: publicNW

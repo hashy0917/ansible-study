@@ -1,0 +1,16 @@
+---
+- hosts: 10.0.0.123
+  tasks:
+    - name: ansible ユーザの作成
+      user: name=ansible uid=1001
+
+    - name: Ansible管理ホストのSSH公開鍵を登録
+      authorized_key:
+        user: ansible
+        key: "{{ lookup('file', '~/ansible-study/study/ansible_rsa.pub') }}"
+
+    - name: ansible ユーザに sudo 権限を付与
+      lineinfile:
+        dest: /etc/sudoers
+        backup: yes
+        line: 'ansible ALL=(ALL) NOPASSWD: ALL'

@@ -1,0 +1,65 @@
+- hosts: k8s-master
+  remote_user: $USERNAME
+  become: yes
+  tasks:
+    - name: Install prerequisites and Docker.io #dockerインストール
+      become: yes
+      apt: name={{item}} update_cache=yes
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - docker.io
+    - name: user add to docker group
+      user: name=gauss group=docker append=yes
+    - name: Add K8S GPG key #k8sインストール準備
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    - name: Add K8S APT repository
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    - name: Install K8S
+      apt: name={{item}} update_cache=yes
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl
+    - name: Remove swapfile from /etc/fstab #swapを消しておかないと失敗する
+      mount:
+        name: swap
+        fstype: swap
+        state: absent
+    - name: Disable swap
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+    - name: Set docker service to start on boot. #再起動後もdockerを自動起動させる
+      service: name=docker enabled=yes
+    - name: Set kubelet service to start on boot. #再起動後もk8sを自動起動させる
+      service: name=kubelet enabled=yes
+    - name: Init k8s-master #k8smの初期化
+      become: yes
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.100.191
+    - name: Make Directory .kube
+      file:
+        path: /.kube
+        state: directory
+        owner: $USERNAME
+        group: docker
+        mode: 0755
+    - name: Copy the .kube config
+      become: yes
+      file:
+        src: /home/$USERNAME/ansible/admin.conf
+        dest: ~/.kube/config
+        owner: $USERNAME
+        group: docker
+        mode: 0600
+    - name: Export Kubernetes
+      lineinfile:
+        path: /home/$USERNAME/.kube/config
+        state: absent
+        regexp: '^%KUBECONFIG'
+    - name: Apply Flannel #flannelのネットワークを作成
+      sudo: yes
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml

@@ -1,7 +1,8 @@
 ---
-# - hosts: worker
-- hosts: all
+- hosts: worker
   roles:
     - common
     - docker
-
+    - kube
+    - set_bridged_traffic
+    - add_worker

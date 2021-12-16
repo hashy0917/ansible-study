@@ -4,11 +4,6 @@
     - common
     - docker
     - kube
-  tasks:
-    - name: install kubeadm
-      become: true
-      apt: name=kubeadm state=latest
-    - name: kubeadm init
-      become: true
-      shell: kubeadm init --apiserver-advertise-address={{ ansible_eth0.ipv4.address }} --pod-network-cidr=10.244.0.0/16
-
+    - set_bridged_traffic
+    - init_master
+    - create_token

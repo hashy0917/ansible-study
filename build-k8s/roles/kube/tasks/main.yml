@@ -3,34 +3,35 @@
   become: true
   apt: 
     name: 
+      - kubeadm
       - kubelet 
       - kubectl
     state: latest
   tags: kube
 
-
-
-- name: check docker version
-  become: true
-  command: docker version -f \{\{.Server.Version\}\}
+- name: check swap state
+  shell: swapon -v
+  register: swap_state
+  check_mode: false
   changed_when: false
-  ignore_errors: yes
-  chack_mode: no
-  tags: docker
-  register: docker_installed
 
-- name: install docker
+- name: swap off
   become: true
-  shell: curl https://get.docker.com | sh
-  tags: docker
-  when: (docker_installed.rc != 0)
+  shell: swapoff -a
+  when: swap_state.stdout != ''
 
-- name: add user to docker group
-  user: name={{ ansible_ssh_user }} groups=docker append=yes
-  tags: docker
+- name: swap check (/etc/fstab)
+  shell: grep -v "\s*#" /etc/fstab | awk '{print $2}' | grep swap -c
+  register: swap_state_in_fstab
+  check_mode: false
+  changed_when: false
+  ignore_errors: true
 
-- name: enable docker service
-  service: name=docker enabled=yes state=started
-  with_items:
-          - docker
-  tags: docker
+- name: disable swap (/etc/fstab)
+  become: true
+  replace:
+    path: /etc/fstab
+    regexp: ([^\s]+\s+swap\s+.*)
+    replace: '# \1'
+  when: swap_state_in_fstab.stdout != '0'
+

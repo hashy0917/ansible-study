@@ -1,0 +1,30 @@
+---
+- name: install curl
+  become: true
+  apt: name=curl state=latest
+  tags: docker
+
+- name: check docker version
+  become: true
+  command: docker version -f \{\{.Server.Version\}\}
+  changed_when: false
+  ignore_errors: yes
+  chack_mode: no
+  tags: docker
+  register: docker_installed
+
+- name: install docker
+  become: true
+  shell: curl https://get.docker.com | sh
+  tags: docker
+  when: (docker_installed.rc != 0)
+
+- name: add user to docker group
+  user: name={{ ansible_ssh_user }} groups=docker append=yes
+  tags: docker
+
+- name: enable docker service
+  service: name=docker enabled=yes state=started
+  with_items:
+          - docker
+  tags: docker

@@ -1,0 +1,7 @@
+---
+# - hosts: worker
+- hosts: all
+  roles:
+    - common
+    - docker
+

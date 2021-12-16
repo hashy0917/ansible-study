@@ -1,5 +1,6 @@
 ---
 - name: load br_netfilter module
+  become: true
   modprobe:
     name: br_netfilter
     state: present
@@ -13,6 +14,7 @@
   # (sysctl --systemだと問題無かった)
 
 - name: confiture sysctl
+  become: true
   sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"

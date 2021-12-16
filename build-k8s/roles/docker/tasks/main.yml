@@ -8,8 +8,8 @@
   become: true
   command: docker version -f \{\{.Server.Version\}\}
   changed_when: false
-  ignore_errors: yes
-  chack_mode: no
+  ignore_errors: true
+  check_mode: false
   tags: docker
   register: docker_installed
 
@@ -20,11 +20,12 @@
   when: (docker_installed.rc != 0)
 
 - name: add user to docker group
-  user: name={{ ansible_ssh_user }} groups=docker append=yes
+  become: true
+  user: name={{ ansible_env.USER }} groups=docker append=yes
   tags: docker
 
 - name: enable docker service
   service: name=docker enabled=yes state=started
   with_items:
-          - docker
+    - docker
   tags: docker

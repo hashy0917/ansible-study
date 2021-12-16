@@ -5,6 +5,7 @@
     dest: "{{ lookup('env','HOME') }}/kubeadm-config.yaml"
 
 - name: execute kubeadm init
+  become: true
   shell: kubeadm init --config "{{ lookup('env','HOME') }}/kubeadm-config.yaml" --upload-certs
 
 - name: create $HOME/.kube directory

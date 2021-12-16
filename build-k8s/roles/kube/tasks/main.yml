@@ -1,4 +1,15 @@
 ---
+- name: add apt repo 1
+  become: true
+  apt_key: 
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+- name: add apt repo 2
+  become: true
+  apt_repository: 
+    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    update_cache: yes
+
 - name: apt install kubelet kubectl
   become: true
   apt: 

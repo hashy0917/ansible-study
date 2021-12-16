@@ -4,4 +4,6 @@
   apt:
     update_cache: yes
     upgrade: yes
-  
+- name: add hosts
+  become: true
+  lineinfile: state=present dest=/etc/hosts regexp='^10.10.10.27' line='10.10.10.27 kubernetes.local.hashy0917.net' create=yes #/etc/hostsにサーバ情報を追記する
